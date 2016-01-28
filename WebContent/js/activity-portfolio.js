@@ -3,6 +3,18 @@ var app = angular.module('ui.bootstrap.demo');
 app.config(['$httpProvider', function ($httpProvider) {    
 	$httpProvider.defaults.headers.post['Content-Type'] = 'application/json; charset=UTF-8';
 }]);
+
+
+app.directive('expand', function () {
+    return {
+        restrict: 'A',
+        controller: ['$scope', function ($scope) {
+            $scope.$on('onExpandAll', function (event, args) {
+                $scope.expanded = args.expanded;
+            });
+        }]
+    };
+});
 app.service("shared", function() {
 	var _stock = null;
 	var _user = null;
@@ -37,8 +49,15 @@ app.service("shared", function() {
 	$scope.message = shared.getMessage();
 });
 
-app.controller("mainController", ["$scope", "$interval" ,"$http", "$rootScope", "shared", 
-                                  function($scope, $interval, $http, $rootScope, shared) {
+app.controller("mainController", ["$scope", "$interval" ,"$http", "$rootScope", "shared","Dealers", 
+                                  function($scope, $interval, $http, $rootScope, shared, Dealers) {
+	 var self = this;
+	    self.dealers = Dealers.query();
+
+	    self.expandAll = function (expanded) {
+	        // $scope is required here, hence the injection above, even though we're using "controller as" syntax
+	        $scope.$broadcast('onExpandAll', {expanded: expanded});
+	    };
 	$scope.user;
 	$scope.loading=false;
 	$scope.percent = Math.random()*50+"%";
